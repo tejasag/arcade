@@ -256,7 +256,7 @@
 	}
 	@media (min-width: 768px) {
 		.bio {
-			max-width: 750px;
+			max-width: calc(0.50 * 100vw);
 		}
 	}
 

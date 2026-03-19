@@ -61,7 +61,7 @@
 			<p class="mb-0">
 				I am a CS &amp; Human Sciences student at
 				<a href="https://iiit.ac.in" target="_blank"> <span style={dotStyle}>IIIT-Hyderabad</span> </a>
-				interested in Reinforcement Learning, Applied ML, Game Theory, and Graph
+				interested in Reinforcement Learning, Applied ML, Algorithmic Game Theory, Graph
 				algorithms and how systems, computational or human, make decisions under uncertainty. 
 			</p>
 			<p class="mt-paragraph">
@@ -256,7 +256,7 @@
 	}
 	@media (min-width: 768px) {
 		.bio {
-			max-width: calc(0.50 * 100vw);
+			max-width: calc(0.55 * 100vw);
 		}
 	}
 

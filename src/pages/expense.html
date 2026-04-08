@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Expense Splitter</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --font-sans: system-ui, -apple-system, sans-serif;
+    --color-bg: #ffffff;
+    --color-bg-secondary: #f5f5f3;
+    --color-text-primary: #1a1a18;
+    --color-text-secondary: #6b6b67;
+    --color-border: rgba(0,0,0,0.12);
+    --color-border-hover: rgba(0,0,0,0.25);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #1c1c1a;
+      --color-bg-secondary: #272725;
+      --color-text-primary: #f0efe8;
+      --color-text-secondary: #999990;
+      --color-border: rgba(255,255,255,0.12);
+      --color-border-hover: rgba(255,255,255,0.25);
+    }
+  }
+  body { font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text-primary); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+  .section-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  input[type=text], input[type=number] {
+    width: 100%; padding: 0 12px; height: 36px; font-size: 14px; font-family: inherit;
+    background: var(--color-bg); color: var(--color-text-primary);
+    border: 0.5px solid var(--color-border); border-radius: var(--radius-md); outline: none;
+  }
+  input:hover { border-color: var(--color-border-hover); }
+  input:focus { border-color: var(--color-border-hover); box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+  @media (prefers-color-scheme: dark) {
+    input:focus { box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+  }
+  button {
+    height: 36px; padding: 0 16px; font-size: 14px; font-family: inherit; cursor: pointer;
+    background: transparent; color: var(--color-text-primary);
+    border: 0.5px solid var(--color-border-hover); border-radius: var(--radius-md);
+  }
+  button:hover { background: var(--color-bg-secondary); }
+  button:active { transform: scale(0.98); }
+  .people-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .people-row input { flex: 1; }
+  .people-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; }
+  .tag { display: flex; align-items: center; gap: 6px; background: var(--color-bg-secondary); border: 0.5px solid var(--color-border); border-radius: var(--radius-md); padding: 4px 10px; font-size: 13px; }
+  .tag button { background: none; border: none; color: var(--color-text-secondary); font-size: 14px; height: auto; padding: 0; }
+  .tag button:hover { background: none; color: var(--color-text-primary); }
+  hr { border: none; border-top: 0.5px solid var(--color-border); margin: 1.5rem 0; }
+  .item-form { background: var(--color-bg); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; margin-bottom: 8px; }
+  .who-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .checkboxes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .check-pill { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .check-pill input[type=checkbox] { width: 14px; height: 14px; }
+  .check-pill span { font-size: 13px; }
+  .add-item-btn { width: 100%; margin-top: 4px; }
+  .items-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+  .item-card { background: var(--color-bg); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .item-name { font-size: 14px; font-weight: 500; }
+  .item-meta { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .item-price { font-size: 15px; font-weight: 500; white-space: nowrap; }
+  .del-btn { background: none; border: none; color: var(--color-text-secondary); font-size: 16px; height: auto; padding: 0 0 0 8px; }
+  .del-btn:hover { background: none; color: var(--color-text-primary); }
+  .summary { background: var(--color-bg); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+  .summary-header { padding: 0.75rem 1.25rem; border-bottom: 0.5px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+  .summary-title { font-size: 15px; font-weight: 500; }
+  .summary-total { font-size: 13px; color: var(--color-text-secondary); }
+  .person-row { display: flex; align-items: center; gap: 12px; padding: 0.75rem 1.25rem; border-bottom: 0.5px solid var(--color-border); }
+  .person-row:last-child { border-bottom: none; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .person-name { flex: 1; font-size: 14px; }
+  .person-amount { font-size: 16px; font-weight: 500; }
+  .bar-wrap { flex: 1; height: 4px; background: var(--color-bg-secondary); border-radius: 2px; overflow: hidden; }
+  .bar { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .error { font-size: 12px; color: #A32D2D; margin-top: 4px; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Expense splitter</h1>
+  <p class="sub">Track purchases and see what each person owes</p>
+
+  <div class="section-label">People</div>
+  <div class="people-row">
+    <input type="text" id="personInput" placeholder="Enter a name..." maxlength="30" />
+    <button onclick="addPerson()">Add</button>
+  </div>
+  <div class="people-tags" id="peopleTags"></div>
+
+  <hr>
+
+  <div class="section-label">Add purchase</div>
+  <div class="item-form">
+    <div class="form-row">
+      <input type="text" id="itemName" placeholder="Item name..." maxlength="60" />
+      <input type="number" id="itemCost" placeholder="Cost (₹)" min="0" step="0.01" />
+    </div>
+    <div class="who-label">Split between:</div>
+    <div class="checkboxes" id="checkboxes">
+      <span style="font-size:13px;color:var(--color-text-secondary);">Add people above first</span>
+    </div>
+    <div class="error" id="formError"></div>
+    <button class="add-item-btn" onclick="addItem()">Add purchase</button>
+  </div>
+
+  <div class="items-list" id="itemsList"></div>
+
+  <hr id="summaryDivider" style="display:none">
+  <div id="summarySection"></div>
+</div>
+
+<script>
+const people = [];
+const items = [];
+
+const avatarColors = [
+  {bg:'#EEEDFE',txt:'#3C3489'},
+  {bg:'#E1F5EE',txt:'#085041'},
+  {bg:'#FAECE7',txt:'#712B13'},
+  {bg:'#FBEAF0',txt:'#72243E'},
+  {bg:'#E6F1FB',txt:'#0C447C'},
+  {bg:'#EAF3DE',txt:'#27500A'},
+  {bg:'#FAEEDA',txt:'#633806'},
+];
+
+function getColor(i) { return avatarColors[i % avatarColors.length]; }
+function initials(name) { return name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+function addPerson() {
+  const input = document.getElementById('personInput');
+  const name = input.value.trim();
+  if (!name || people.map(p=>p.toLowerCase()).includes(name.toLowerCase())) { input.focus(); return; }
+  people.push(name);
+  input.value = '';
+  renderPeopleTags();
+  renderCheckboxes();
+  renderSummary();
+}
+
+document.getElementById('personInput').addEventListener('keydown', e => { if (e.key==='Enter') addPerson(); });
+document.getElementById('itemName').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('itemCost').focus(); });
+document.getElementById('itemCost').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
+
+function removePerson(i) {
+  const name = people[i];
+  people.splice(i, 1);
+  items.forEach(item => { item.who = item.who.filter(w => w !== name); });
+  renderPeopleTags();
+  renderCheckboxes();
+  renderItems();
+  renderSummary();
+}
+
+function renderPeopleTags() {
+  const el = document.getElementById('peopleTags');
+  if (!people.length) { el.innerHTML = ''; return; }
+  el.innerHTML = people.map((p,i) =>
+    `<div class="tag"><span>${p}</span><button onclick="removePerson(${i})" title="Remove">×</button></div>`
+  ).join('');
+}
+
+function renderCheckboxes() {
+  const el = document.getElementById('checkboxes');
+  if (!people.length) { el.innerHTML = '<span style="font-size:13px;color:var(--color-text-secondary);">Add people above first</span>'; return; }
+  el.innerHTML = people.map((p) =>
+    `<label class="check-pill"><input type="checkbox" value="${p}" checked /><span>${p}</span></label>`
+  ).join('');
+}
+
+function addItem() {
+  const name = document.getElementById('itemName').value.trim();
+  const cost = parseFloat(document.getElementById('itemCost').value);
+  const checked = [...document.querySelectorAll('#checkboxes input:checked')].map(c => c.value);
+  const errEl = document.getElementById('formError');
+
+  if (!name || isNaN(cost) || cost <= 0 || !checked.length) {
+    errEl.style.display = 'block';
+    errEl.textContent = !name ? 'Enter an item name.' : isNaN(cost)||cost<=0 ? 'Enter a valid cost.' : 'Select at least one person.';
+    return;
+  }
+  errEl.style.display = 'none';
+  items.push({ name, cost, who: checked });
+  document.getElementById('itemName').value = '';
+  document.getElementById('itemCost').value = '';
+  renderCheckboxes();
+  renderItems();
+  renderSummary();
+}
+
+function removeItem(i) { items.splice(i, 1); renderItems(); renderSummary(); }
+
+function renderItems() {
+  const el = document.getElementById('itemsList');
+  if (!items.length) { el.innerHTML = ''; return; }
+  el.innerHTML = items.map((item, i) =>
+    `<div class="item-card">
+      <div>
+        <div class="item-name">${item.name}</div>
+        <div class="item-meta">Split between: ${item.who.join(', ')} &nbsp;·&nbsp; ₹${(item.cost/item.who.length).toFixed(2)} each</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div class="item-price">₹${item.cost.toFixed(2)}</div>
+        <button class="del-btn" onclick="removeItem(${i})" title="Remove">×</button>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function renderSummary() {
+  const section = document.getElementById('summarySection');
+  const divider = document.getElementById('summaryDivider');
+  if (!items.length || !people.length) { section.innerHTML = ''; divider.style.display='none'; return; }
+
+  const totals = {};
+  people.forEach(p => totals[p] = 0);
+  items.forEach(item => {
+    const share = item.cost / item.who.length;
+    item.who.forEach(p => { if (totals[p] !== undefined) totals[p] += share; });
+  });
+
+  const grandTotal = Object.values(totals).reduce((a,b)=>a+b,0);
+  const maxAmt = Math.max(...Object.values(totals));
+
+  divider.style.display = '';
+  section.innerHTML = `
+    <div class="section-label">Summary</div>
+    <div class="summary">
+      <div class="summary-header">
+        <span class="summary-title">Individual totals</span>
+        <span class="summary-total">Grand total: ₹${grandTotal.toFixed(2)}</span>
+      </div>
+      ${people.map((p,i) => {
+        const amt = totals[p] || 0;
+        const c = getColor(i);
+        const pct = maxAmt > 0 ? (amt/maxAmt*100).toFixed(1) : 0;
+        return `<div class="person-row">
+          <div class="avatar" style="background:${c.bg};color:${c.txt};">${initials(p)}</div>
+          <div class="person-name">${p}</div>
+          <div class="bar-wrap"><div class="bar" style="width:${pct}%;background:${c.txt};opacity:0.7;"></div></div>
+          <div class="person-amount">₹${amt.toFixed(2)}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+</script>
+</body>
+</html>
